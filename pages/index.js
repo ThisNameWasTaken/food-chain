@@ -9,6 +9,7 @@ import {
 } from '@material-ui/core';
 
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -40,8 +41,11 @@ const Home = () => {
 
   const { register, handleSubmit, errors } = useForm();
   const onSubmit = data => {
+    console.log(locationAction);
     console.log(data);
   };
+
+  const [locationAction, setLocationAction] = useState(null);
 
   return (
     <div className="container">
@@ -57,7 +61,7 @@ const Home = () => {
                       variant="outlined"
                       label="Contact Address"
                       name="Contact Address"
-                      ref={register}
+                      inputRef={register({ required: true })}
                     />
                   </Grid>
                   <Grid item>
@@ -66,7 +70,7 @@ const Home = () => {
                       variant="outlined"
                       label="Location ID"
                       name="Location ID"
-                      ref={register}
+                      inputRef={register({ required: true })}
                     />
                   </Grid>
                   <Grid item>
@@ -75,7 +79,7 @@ const Home = () => {
                       variant="outlined"
                       label="Location Name"
                       name="Location Name"
-                      ref={register}
+                      inputRef={register({ required: true })}
                     />
                   </Grid>
                   <Grid item>
@@ -84,7 +88,7 @@ const Home = () => {
                       variant="outlined"
                       label="Secret"
                       name="Secret"
-                      ref={register}
+                      inputRef={register({ required: true })}
                     />
                   </Grid>
                   <Grid item>
@@ -93,7 +97,7 @@ const Home = () => {
                       variant="outlined"
                       label="Pass Phrase"
                       name="Pass Phrase"
-                      ref={register}
+                      inputRef={register({ required: true })}
                     />
                   </Grid>
                 </Grid>
@@ -105,6 +109,9 @@ const Home = () => {
                       variant="contained"
                       color="primary"
                       type="submit"
+                      onClick={event => {
+                        setLocationAction('add');
+                      }}
                     >
                       Add location
                     </Button>
@@ -115,6 +122,9 @@ const Home = () => {
                       variant="contained"
                       color="secondary"
                       type="submit"
+                      onClick={event => {
+                        setLocationAction('get');
+                      }}
                     >
                       Get location
                     </Button>
