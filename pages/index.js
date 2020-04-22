@@ -11,6 +11,9 @@ import {
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 
+import web3 from 'web3';
+import cryptoJs from 'crypto-js';
+
 const useStyles = makeStyles(theme => ({
   container: {
     maxWidth: 400,
@@ -46,6 +49,30 @@ const Home = () => {
   };
 
   const [locationAction, setLocationAction] = useState(null);
+
+  const web3 = new Web3(Web3.givenProvider);
+  var foodChainABI, foodChainContract, acc;
+
+const start = () => {
+  web3.eth.getAccounts(function(err, accounts) {
+    account = accounts[0];
+    web3.eth.defaultAccount = acc;
+  })
+  const http = new XMLHttpRequest();
+  const url = 'http://localhost:8000';
+  http.open("GET", url);
+  http.send();
+  http.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200)
+    {
+      var output = JSON.parse(this.response);
+      foodChainCode = output.contracts[":FoodChain"].bytecode;
+      var metadata = JSON.parse(output.contracts[":FoodChain"].metadata);
+      foodChainABI = metadata.output.abi;
+      foodChainContract = new web3.eth.Contract(foodChainABI);
+    }
+  }
+}
 
   return (
     <div className="container">
