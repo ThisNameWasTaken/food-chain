@@ -14,6 +14,9 @@ import { useState, useEffect } from 'react';
 import Web3 from 'web3';
 import * as CryptoJS from 'crypto-js';
 
+import FoodChain from '../contracts/FoodChain.json';
+import Migrations from '../contracts/Migrations.json';
+
 const useStyles = makeStyles(theme => ({
   container: {
     maxWidth: 400,
@@ -37,6 +40,9 @@ const useStyles = makeStyles(theme => ({
     display: 'block',
     fontWeight: 'bold',
   },
+  createContractButton: {
+    background: '#73BFB8',
+  },
 }));
 
 const Home = () => {
@@ -44,11 +50,8 @@ const Home = () => {
 
   const { register, handleSubmit, errors, setValue, getValues } = useForm();
   const onSubmit = data => {
-    console.log(locationAction);
     console.log(data);
   };
-
-  const [locationAction, setLocationAction] = useState(null);
 
   // /** @type {Eth.Contract} */
   let foodChainContract;
@@ -58,11 +61,29 @@ const Home = () => {
   let web3;
 
   useEffect(() => {
-    web3 = new Web3(Web3.givenProvider);
-
-    console.log(web3);
+    console.log(Web3.givenProvider);
+    console.log(window.ethereum);
 
     (async function start() {
+      web3 = await (async function initWeb3() {
+        // @ts-ignore
+        if (window.ethereum) {
+          // @ts-ignore
+          await window.ethereum.enable();
+          // @ts-ignore
+          return new Web3(window.ethereum);
+          // @ts-ignore
+        } else if (window.web3) {
+          // @ts-ignore
+          return new Web3(window.web3.currentProvider);
+        } else {
+          window.alert(
+            'Non-Ethereum browser detected. You should consider trying MetaMask!'
+          );
+          return null;
+        }
+      })();
+
       web3.eth.getAccounts(function (err, accounts) {
         if (err) throw err;
 
@@ -72,16 +93,53 @@ const Home = () => {
         web3.eth.defaultAccount = account;
       });
 
-      const res = await fetch('http://localhost:3001');
-      const data = JSON.parse(await res.text());
-      console.log(data);
-      foodChainCode = data.contracts.contract.FoodChain.evm.bytecode;
-      foodChainABI = data.contracts.contract.FoodChain.abi;
+      console.log(FoodChain);
+      foodChainCode = FoodChain.bytecode;
+      foodChainABI = FoodChain.abi;
       foodChainContract = new web3.eth.Contract(foodChainABI);
     })();
   }, []);
 
+  let _contract;
+
+  async function getTrailCount() {
+    async function getNetworkData() {
+      const id = await web3.eth.net.getId();
+
+      const networkId = id;
+      return networkId ? FoodChain.networks[networkId] : null;
+    }
+
+    async function getContract() {
+      if (_contract) {
+        return _contract;
+      } else {
+        if (!web3) {
+          return null;
+        }
+        const networkData = await getNetworkData();
+        console.log({ networkData });
+        if (!networkData) {
+          return null;
+        }
+
+        _contract = new web3.eth.Contract(FoodChain.abi, networkData.address);
+        console.log({ _contract });
+        return _contract;
+      }
+    }
+
+    const contract = await getContract();
+    console.log({ contract });
+    const trailCCount = await contract.methods.GetTrailCount().call();
+    console.log('trail count', trailCCount);
+    // console.log('trail count', contract.methods.GetTrailCount());
+    return null;
+  }
+
   async function createContract() {
+    console.log(foodChainCode);
+
     const deployedContract = await foodChainContract
       .deploy({ data: foodChainCode })
       .send({ from: account, data: foodChainCode, gas: 3000000 })
@@ -224,8 +282,10 @@ const Home = () => {
                       variant="contained"
                       color="primary"
                       type="submit"
-                      onClick={event => {
-                        addNewLocation();
+                      onClick={async event => {
+                        // addNewLocation();
+                        // console.log('trailcount', await getTrailCount());
+                        getTrailCount();
                       }}
                     >
                       Add location
