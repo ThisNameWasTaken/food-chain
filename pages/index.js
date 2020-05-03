@@ -5,44 +5,44 @@ import {
   CardContent,
   Card,
   Grid,
-  makeStyles,
-} from '@material-ui/core';
+  makeStyles
+} from "@material-ui/core";
 
-import { useForm } from 'react-hook-form';
-import { useState, useEffect } from 'react';
+import { useForm } from "react-hook-form";
+import { useState, useEffect } from "react";
 
-import Web3 from 'web3';
-import * as CryptoJS from 'crypto-js';
+import Web3 from "web3";
+import * as CryptoJS from "crypto-js";
 
-import FoodChain from '../contracts/FoodChain.json';
-import Migrations from '../contracts/Migrations.json';
+import FoodChain from "../contracts/FoodChain.json";
+import Migrations from "../contracts/Migrations.json";
 
 const useStyles = makeStyles(theme => ({
   container: {
     maxWidth: 400,
-    display: 'flex',
-    height: 'calc(var(--vh, 1vh) * 100)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    display: "flex",
+    height: "calc(var(--vh, 1vh) * 100)",
+    justifyContent: "center",
+    alignItems: "center"
   },
   card: {
-    width: '100%',
+    width: "100%"
   },
   textField: {
-    width: '100%',
-    marginBottom: theme.spacing(1),
+    width: "100%",
+    marginBottom: theme.spacing(1)
   },
   buttonsContainer: {
-    marginTop: theme.spacing(1),
+    marginTop: theme.spacing(1)
   },
   button: {
-    width: '100%',
-    display: 'block',
-    fontWeight: 'bold',
+    width: "100%",
+    display: "block",
+    fontWeight: "bold"
   },
   createContractButton: {
-    background: '#73BFB8',
-  },
+    background: "#73BFB8"
+  }
 }));
 
 const Home = () => {
@@ -78,13 +78,13 @@ const Home = () => {
           return new Web3(window.web3.currentProvider);
         } else {
           window.alert(
-            'Non-Ethereum browser detected. You should consider trying MetaMask!'
+            "Non-Ethereum browser detected. You should consider trying MetaMask!"
           );
           return null;
         }
       })();
 
-      web3.eth.getAccounts(function (err, accounts) {
+      web3.eth.getAccounts(function(err, accounts) {
         if (err) throw err;
 
         console.log({ accounts });
@@ -132,7 +132,7 @@ const Home = () => {
     const contract = await getContract();
     console.log({ contract });
     const trailCCount = await contract.methods.GetTrailCount().call();
-    console.log('trail count', trailCCount);
+    console.log("trail count", trailCCount);
     // console.log('trail count', contract.methods.GetTrailCount());
     return null;
   }
@@ -143,15 +143,15 @@ const Home = () => {
     const deployedContract = await foodChainContract
       .deploy({ data: foodChainCode })
       .send({ from: account, data: foodChainCode, gas: 3000000 })
-      .on('confirmation', function (confirmationNumber, receipt) {});
+      .on("confirmation", function(confirmationNumber, receipt) {});
 
     const contractAddress = deployedContract.options.address;
-    setValue('Contract Address', contractAddress);
+    setValue("Contract Address", contractAddress);
   }
 
   function addNewLocation() {
     const formData = getValues();
-    const contractAddress = formData['Contract Address'];
+    const contractAddress = formData["Contract Address"];
 
     const deployedFoodChain = new web3.eth.Contract(
       foodChainABI,
@@ -159,10 +159,10 @@ const Home = () => {
       { from: account, gas: 3000000 }
     );
 
-    const locationId = formData['Location ID'];
-    const locationName = formData['Location Name'];
-    const locationSecret = formData['Secret'];
-    const passPhrase = formData['Pass Phrase'];
+    const locationId = formData["Location ID"];
+    const locationName = formData["Location Name"];
+    const locationSecret = formData["Secret"];
+    const passPhrase = formData["Pass Phrase"];
 
     const encryptedSecret = CryptoJS.AES.encrypt(
       locationSecret,
@@ -176,7 +176,7 @@ const Home = () => {
 
   async function getCurrentLocation() {
     const formData = getValues();
-    const contractAddress = formData['Contract Address'];
+    const contractAddress = formData["Contract Address"];
 
     const deployedFoodChain = new web3.eth.Contract(
       foodChainABI,
@@ -184,14 +184,14 @@ const Home = () => {
       { from: web3.eth.defaultAccount, gas: 3000000 }
     );
 
-    const passPhrase = formData['Pass Phrase'];
+    const passPhrase = formData["Pass Phrase"];
     const trailCount = await deployedFoodChain.methods.GetTrailCount().call();
     const returnValues = await deployedFoodChain.methods
       .GetLocation(trailCount - 1)
       .call();
 
-    setValue('Location Name', returnValues[0]);
-    setValue('Location ID', returnValues[1]);
+    setValue("Location Name", returnValues[0]);
+    setValue("Location ID", returnValues[1]);
 
     const encryptedSecret = returnValues[4];
     const decryptedSecret = CryptoJS.AES.decrypt(
@@ -199,7 +199,7 @@ const Home = () => {
       passPhrase
     ).toString(CryptoJS.enc.Utf8);
 
-    setValue('Secret', decryptedSecret);
+    setValue("Secret", decryptedSecret);
   }
 
   return (
