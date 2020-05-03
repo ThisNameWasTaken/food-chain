@@ -271,21 +271,22 @@ const Home = () => {
                       <TextField
                         className={styles.textField}
                         variant="outlined"
-                        label="Pass Phrase Copy"
+                        label="Pass Phrase"
                         name="Pass Phrase Copy"
                         inputRef={register()}
+                        color="secondary"
                       />
                     </Grid>
                   </Grid>
 
                   <Typography className={styles.locationInfo}>
-                    Location ID: {locationDetails.id}
+                    <b>Location ID:</b> {locationDetails.id}
                   </Typography>
                   <Typography className={styles.locationInfo}>
-                    Location Name: {locationDetails.name}
+                    <b>Location Name:</b> {locationDetails.name}
                   </Typography>
                   <Typography className={styles.locationInfo}>
-                    Secret: {locationDetails.secret}
+                    <b>Secret:</b> {locationDetails.secret}
                   </Typography>
 
                   <Grid
